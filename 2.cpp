@@ -84,7 +84,19 @@ std::ostream& operator<<(std::ostream& os, const Rectangle& p) {
   return os;
 }
 
+class Center {
+private:
+  int x;
+  int y;
+public:
+  Center() = default;
+  Center(int givedX, int givedY): x{givedX}, y{givedY} { }
+  Center(const Center* c): x{c->x}, y{c->y} { }
+};
+
 class Square: public Rectangle {
+protected:
+  Center* c;
 private:
   double sideSize() {
     const std::pair<int, int> p1 = vertexes[0].getCoords();
@@ -93,22 +105,23 @@ private:
   }
 public:
   // Конструктор по умолчанию
-  Square() { std::cout << "Square: Конструктор по умолчанию\n"; } 
+  Square(): c {new Center()} { std::cout << "Square: Конструктор по умолчанию\n"; } 
 
   // Конструктор с параметрами
-  Square(std::array<std::pair<int, int>, 4>& points) { 
+  Square(std::array<std::pair<int, int>, 4>& points): c {new Center((points[0].first + points[1].first) / 2, (points[0].second + points[1].second) / 2)} { 
     for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(points[i]);
     std::cout << "Square: Конструктор с параметрами\n" << *this;
   }
 
   // Копирующий конструктор
-  Square(const Square& p) {
+  Square(const Square& p): c {new Center(p.c)} {
     for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(p.vertexes[i].getCoords());
     std::cout << "Square: Копирующий конструктор с параметрами:\n" << *this;
   }
 
   // Деструктор
   ~Square() {
+    delete c;
     std::cout << "Square: Вызов деструктора с параметрами:";
     std::cout << *this;
   }
