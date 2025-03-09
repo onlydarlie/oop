@@ -37,8 +37,8 @@ void Point::setCoords(std::pair<int, int>& givedCoords) {
   y = givedCoords.second;
 }
 
-class Parallelogram;
-class Rhombus;
+class Rectangle;
+class Square;
 
 int main() {
 
