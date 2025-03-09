@@ -1,5 +1,6 @@
 #include <iostream>
 #include <array>
+#include <cmath>
 
 class Point {
 private:
@@ -66,8 +67,11 @@ public:
 
   friend std::ostream& operator<<(std::ostream&, const Rectangle&);
 
-  int area() {
-
+  double area() {
+    const std::pair<int, int> p1 = vertexes[0].getCoords();
+    const std::pair<int, int> p2 = vertexes[1].getCoords();
+    const std::pair<int, int> p3 = vertexes[2].getCoords();
+    return sqrt(abs(p2.first - p1.first) + abs(p2.second - p1.second)) * sqrt(abs(p3.first - p1.first) + abs(p3.second - p1.second));
   }
 };
 
