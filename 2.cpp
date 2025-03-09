@@ -73,6 +73,10 @@ public:
     const std::pair<int, int> p3 = vertexes[2].getCoords();
     return sqrt(abs(p2.first - p1.first) + abs(p2.second - p1.second)) * sqrt(abs(p3.first - p1.first) + abs(p3.second - p1.second));
   }
+
+  void shapeName() {
+    std::cout << "Its Rectangle\n";
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, const Rectangle& p) {
