@@ -1,5 +1,6 @@
 #include <iostream>
 #include <array>
+#include <vector>
 #include <cmath>
 
 class Point {
@@ -7,15 +8,16 @@ private:
   int x;
   int y;
 public:
-  // Конструкторы 
+  double something = 0;
+  // Конструкторы
   Point(): x{0}, y{0} { std::cout << "Point: Конструктор по умолчанию\n"; } // Конструктор по умолчанию
-  Point(std::pair<int, int>& points): x{points.first}, y{points.second} { std::cout << "Point: Конструктор с параметрами:\tx = " << x << "\ty = " << y << "\n"; } // Конструктор с параметрами
-  Point(int givedX, int givedY): x{givedX}, y{givedY} { std::cout << "Point: Конструктор с параметрами:\tx = " << x << "\ty = " << y << "\n"; } // Конструктор с параметрами
-  Point(const Point& p): x{p.x}, y{p.y} { std::cout << "Point: Копирующий конструктор:\tx = " << x << "\ty = " << y << "\n"; } // Копирующий конструктор
+  Point(std::pair<int, int> points): x{points.first}, y{points.second} { std::cout << "Point: Конструктор с параметрами: x = " << x << " y = " << y << "\n"; } // Конструктор с параметрами
+  Point(int givedX, int givedY): x{givedX}, y{givedY} { std::cout << "Point: Конструктор с параметрами: x = " << x << " y = " << y << "\n"; } // Конструктор с параметрами
+  Point(const Point& p): x{p.x}, y{p.y} { std::cout << "Point: Копирующий конструктор: x = " << x << " y = " << y << "\n"; } // Копирующий конструктор
   Point(Point&&); // Перемещающий конструктор
 
   ~Point() { // Деструктор
-    std::cout << "Point: Вызов деструктора с параметрами:\tx = " << x << "\ty = " << y << "\n";
+    std::cout << "Point: Вызов деструктора с параметрами: x = " << x << " y = " << y << "\n";
   }
 
   const std::pair<int, int> getCoords() const; // Геттер
@@ -26,7 +28,7 @@ public:
 Point::Point(Point&& p) { 
   x = std::move(p.x);
   y = std::move(p.y);
-  std::cout << "Point: Перемещающий конструктор:\tx = " << x << "\ty = " << y << "\n";
+  std::cout << "Point: Перемещающий конструктор: x = " << x << " y = " << y << "\n";
 }
 
 // Реализация геттера
@@ -53,6 +55,12 @@ public:
     std::cout << "Rectangle: Конструктор с параметрами\n" << *this;
   }
 
+  // Конструктор с параметрами (array of points)
+  Rectangle(std::array<Point, 4>& points) { 
+    for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(points[i].getCoords());
+    std::cout << "Rectangle: Конструктор с параметрами (array of points)\n" << *this;
+  }
+
   // Копирующий конструктор
   Rectangle(const Rectangle& p) {
     for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(p.vertexes[i].getCoords());
@@ -61,7 +69,7 @@ public:
 
   // Деструктор
   ~Rectangle() {
-    std::cout << "Rectangle: Вызов деструктора с параметрами:";
+    std::cout << "Rectangle: Вызов деструктора с параметрами:\n";
     std::cout << *this;
   }
 
@@ -77,21 +85,24 @@ public:
   virtual void shapeName() {
     std::cout << "Its Rectangle\n";
   }
+
+  const std::array<Point, 4> getVertex() const {
+    return vertexes;
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, const Rectangle& p) {
-  for (size_t i = 0; i < 4; ++i) os << i << "): x = " << p.vertexes[i].getCoords().first << "\ty = " << p.vertexes[i].getCoords().second << '\n'; 
+  for (size_t i = 0; i < 4; ++i) os << i << "): x = " << p.vertexes[i].getCoords().first << " y = " << p.vertexes[i].getCoords().second << '\n'; 
   return os;
 }
 
 class Center {
 private:
-  int x;
-  int y;
+  Point coords;
 public:
   Center() = default;
-  Center(int givedX, int givedY): x{givedX}, y{givedY} { }
-  Center(const Center* c): x{c->x}, y{c->y} { }
+  Center(int givedX, int givedY): coords{givedX, givedY} { }
+  Center(const Center* c): coords{c->coords} { }
 };
 
 class Square: public Rectangle {
@@ -113,10 +124,23 @@ public:
     std::cout << "Square: Конструктор с параметрами\n" << *this;
   }
 
+  // Конструктор с параметрами (array of points)
+  Square(std::array<Point, 4>& points): c {new Center((points[0].getCoords().first + points[1].getCoords().first) / 2, (points[0].getCoords().second + points[1].getCoords().second) / 2)} { 
+    for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(points[i].getCoords());
+    std::cout << "Square: Конструктор с параметрами (array of points)\n" << *this;
+  }
+
   // Копирующий конструктор
   Square(const Square& p): c {new Center(p.c)} {
     for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(p.vertexes[i].getCoords());
     std::cout << "Square: Копирующий конструктор с параметрами:\n" << *this;
+  }
+  
+  // Копирующий от базового класса конструктор 
+  Square(const Rectangle& p): c {new Center()} {
+    const std::array<Point, 4> v = p.getVertex();
+    for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(v[i].getCoords());
+    std::cout << "Square: Копирующий от базового класса конструктор с параметрами:\n" << *this;
   }
 
   // Деструктор
@@ -136,5 +160,72 @@ public:
 };
 
 int main() {
+  // Test Point
+  std::cout << "TEST POINTS\n\n";
+  Point p1;
+  Point p2{std::make_pair(4, 7)};
+  Point* p3 = new Point(6, 9);
+  Point* p4 = new Point(8, 91);
+  Point p5 = *p3;
+  delete p3;
+  std::cout << p5.getCoords().first << ' ' << p5.getCoords().first << '\n';
+  Point p6 = std::move(*p4);
+  delete p4;
+  p6.something = 7.;
+  p6.setCoords({3, 6});
+  std::cout << p6.getCoords().first << ' ' << p6.getCoords().first << '\n';
+
+  // Test Rectangle
+  std::cout << "\nTEST RECTANGLES\n\n";
+  Rectangle r1;
+  Rectangle* r2 = new Rectangle(r1);
+  delete r2;
+  
+  std::array<std::pair<int, int>, 4> arr {{{1,3}, {5,7}, {6,7}, {1,3}}};
+  Rectangle r3(arr);
+
+  std::cout << "Вывод:\n" << r3;
+
+  r3.shapeName();
+  std::cout << "With area: " << r3.area() << '\n';
+
+  Rectangle* r4 = new Rectangle(arr);
+  Rectangle* r5 = new Rectangle(*r4);
+  delete r5;
+
+  std::array<std::pair<int, int>, 4> arr2 {{{34,37}, {8,1}, {0,6}, {5,50}}};
+  Rectangle r6 = arr2;
+  std::array<Point, 4> arr3 {{p2, p5, p6, p2}};
+  Rectangle r7 = arr3;
+
+  // Test Square
+  std::cout << "\nTEST SQUARES\n\n";
+  Square s1;
+  Square s2 {arr};
+  Square& s3 = s2;
+  Square* s4;
+  s4 = new Square(s2);
+  delete s4;
+  Square* s5 = new Square(arr);
+  s5->shapeName();
+  std::cout << "With area: " << s5->area() << '\n';
+  delete s5;
+
+  p1.setCoords(std::make_pair(1, 12));
+  p2.setCoords(std::make_pair(2, 23));
+  p5.setCoords(std::make_pair(3, 34));
+  p6.setCoords(std::make_pair(4, 45));
+  std::array<Point, 4> arr4 {{p1, p2, p5, p6}};
+  Square* s6 = new Square(arr4);
+
+  std::array<Rectangle*, 5> rectangles {&r3, &r7, &r6, &s2, s6};
+  for (auto& r: rectangles) {
+    r->shapeName();
+    std::cout << "With area: " << r->area() << '\n';
+  }
+
+  delete r4;
+  delete s6;
+  
   return 0;
 }
