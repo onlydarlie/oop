@@ -67,14 +67,14 @@ public:
 
   friend std::ostream& operator<<(std::ostream&, const Rectangle&);
 
-  double area() {
+  virtual double area() {
     const std::pair<int, int> p1 = vertexes[0].getCoords();
     const std::pair<int, int> p2 = vertexes[1].getCoords();
     const std::pair<int, int> p3 = vertexes[2].getCoords();
     return sqrt(abs(p2.first - p1.first) + abs(p2.second - p1.second)) * sqrt(abs(p3.first - p1.first) + abs(p3.second - p1.second));
   }
 
-  void shapeName() {
+  virtual void shapeName() {
     std::cout << "Its Rectangle\n";
   }
 };
@@ -84,9 +84,44 @@ std::ostream& operator<<(std::ostream& os, const Rectangle& p) {
   return os;
 }
 
-class Square;
+class Square: public Rectangle {
+private:
+  double sideSize() {
+    const std::pair<int, int> p1 = vertexes[0].getCoords();
+    const std::pair<int, int> p2 = vertexes[1].getCoords();
+    return sqrt(abs(p2.first - p1.first) + abs(p2.second - p1.second));
+  }
+public:
+  // Конструктор по умолчанию
+  Square() { std::cout << "Square: Конструктор по умолчанию\n"; } 
+
+  // Конструктор с параметрами
+  Square(std::array<std::pair<int, int>, 4>& points) { 
+    for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(points[i]);
+    std::cout << "Square: Конструктор с параметрами\n" << *this;
+  }
+
+  // Копирующий конструктор
+  Square(const Square& p) {
+    for (size_t i = 0; i < 4; ++i) vertexes[i].setCoords(p.vertexes[i].getCoords());
+    std::cout << "Square: Копирующий конструктор с параметрами:\n" << *this;
+  }
+
+  // Деструктор
+  ~Square() {
+    std::cout << "Square: Вызов деструктора с параметрами:";
+    std::cout << *this;
+  }
+
+  double area() override {
+    return pow(sideSize(), 2);
+  }
+
+  void shapeName() override {
+    std::cout << "Its Square\n";
+  }
+};
 
 int main() {
-
   return 0;
 }
